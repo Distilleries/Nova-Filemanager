@@ -3,8 +3,8 @@
 namespace Infinety\Filemanager\Http\Services;
 
 use Carbon\Carbon;
+use Dreamonkey\CloudFrontUrlSigner\Facades\CloudFrontUrlSigner;
 use GuzzleHttp\Client;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 trait GetFiles
@@ -55,26 +55,34 @@ trait GetFiles
         return $this->orderData($files, $order, config('filemanager.direction', 'asc'));
     }
 
+    public function getAssetUrl(string $basename)
+    {
+        if (config('filemanager.sign_cloudfront_urls')) {
+            return CloudFrontUrlSigner::sign($this->storage->url($basename));
+        }
+        return $this->storage->url($basename);
+    }
+
     /**
      * @param $file
      * @param $id
      */
     public function getFileData($file, $id)
     {
-        if (! $this->isDot($file) && ! $this->exceptExtensions->contains($file['extension']) && ! $this->exceptFolders->contains($file['basename']) && ! $this->exceptFiles->contains($file['basename']) && $this->accept($file)) {
+        if (!$this->isDot($file) && !$this->exceptExtensions->contains($file['extension']) && !$this->exceptFolders->contains($file['basename']) && !$this->exceptFiles->contains($file['basename']) && $this->accept($file)) {
             $fileInfo = [
-                'id'         => $id,
-                'name'       => trim($file['basename']),
-                'path'       => $this->cleanSlashes($file['path']),
-                'type'       => $file['type'],
-                'mime'       => $this->getFileType($file),
-                'ext'        => (isset($file['extension'])) ? $file['extension'] : false,
-                'size'       => ($file['size'] != 0) ? $file['size'] : 0,
+                'id' => $id,
+                'name' => trim($file['basename']),
+                'path' => $this->cleanSlashes($file['path']),
+                'type' => $file['type'],
+                'mime' => $this->getFileType($file),
+                'ext' => (isset($file['extension'])) ? $file['extension'] : false,
+                'size' => ($file['size'] != 0) ? $file['size'] : 0,
                 'size_human' => ($file['size'] != 0) ? $this->formatBytes($file['size'], 0) : 0,
-                'thumb'      => $this->getThumbFile($file),
-                'asset'      => $this->cleanSlashes($this->storage->url($file['basename'])),
-                'can'        => true,
-                'loading'    => false,
+                'thumb' => $this->getThumbFile($file),
+                'asset' => $this->cleanSlashes($this->getAssetUrl($file['basename'])),
+                'can' => true,
+                'loading' => false,
             ];
 
             if (isset($file['timestamp'])) {
@@ -84,18 +92,18 @@ trait GetFiles
 
             if ($fileInfo['mime'] == 'image') {
                 [$width, $height] = $this->getImageDimesions($file);
-                if (! $width == false) {
-                    $fileInfo['dimensions'] = $width.'x'.$height;
+                if (!$width == false) {
+                    $fileInfo['dimensions'] = $width . 'x' . $height;
                 }
             }
 
             if ($fileInfo['type'] == 'dir') {
-                if (! $this->checkShouldHideFolder($fileInfo['path'])) {
+                if (!$this->checkShouldHideFolder($fileInfo['path'])) {
                     return false;
                 }
             }
 
-            return (object) $fileInfo;
+            return (object)$fileInfo;
         }
     }
 
@@ -176,17 +184,17 @@ trait GetFiles
     /**
      * Generates an id based on file.
      *
-     * @param   array  $file
+     * @param array $file
      *
      * @return  string
      */
     public function generateId($file)
     {
         if (isset($file['timestamp'])) {
-            return md5($this->disk.'_'.trim($file['basename']).$file['timestamp']);
+            return md5($this->disk . '_' . trim($file['basename']) . $file['timestamp']);
         }
 
-        return md5($this->disk.'_'.trim($file['basename']));
+        return md5($this->disk . '_' . trim($file['basename']));
     }
 
     /**
@@ -201,9 +209,9 @@ trait GetFiles
         $publicPath = str_replace($defaultPath, '', $folder);
 
         if ($folder != '/') {
-            $this->currentPath = $this->getAppend().'/'.$publicPath;
+            $this->currentPath = $this->getAppend() . '/' . $publicPath;
         } else {
-            $this->currentPath = $this->getAppend().$publicPath;
+            $this->currentPath = $this->getAppend() . $publicPath;
         }
     }
 
@@ -320,10 +328,10 @@ trait GetFiles
 
         if (Str::contains($mime, 'image') || $extension == 'svg') {
             if (method_exists($this->storage, 'put')) {
-                return $this->storage->url($file['path']);
+                return $this->getAssetUrl($file['path']);
             }
 
-            return $folder.'/'.$file['basename'];
+            return $folder . '/' . $file['basename'];
         }
 
         $fileType = new FileTypesImages();
@@ -387,10 +395,10 @@ trait GetFiles
     public function normalizeFiles($files)
     {
         foreach ($files as $key => $file) {
-            if (! isset($file['extension'])) {
+            if (!isset($file['extension'])) {
                 $files[$key]['extension'] = null;
             }
-            if (! isset($file['size'])) {
+            if (!isset($file['size'])) {
                 // $size = $this->storage->getSize($file['path']);
                 $files[$key]['size'] = null;
             }
@@ -412,7 +420,7 @@ trait GetFiles
     /**
      * Check if file is Dot.
      *
-     * @param   string   $file
+     * @param string $file
      *
      * @return  bool
      */
@@ -441,20 +449,20 @@ trait GetFiles
             }
 
             return [
-                'id'                => 'folder_back',
-                'name'              => __('Go up'),
-                'path'              => $this->cleanSlashes($folderPath),
-                'type'              => 'dir',
-                'mime'              => 'dir',
-                'ext'               => false,
-                'size'              => 0,
-                'size_human'        => 0,
-                'thumb'             => '',
-                'asset'             => $this->cleanSlashes($this->storage->url($folderPath)),
-                'can'               => true,
-                'loading'           => false,
+                'id' => 'folder_back',
+                'name' => __('Go up'),
+                'path' => $this->cleanSlashes($folderPath),
+                'type' => 'dir',
+                'mime' => 'dir',
+                'ext' => false,
+                'size' => 0,
+                'size_human' => 0,
+                'thumb' => '',
+                'asset' => $this->cleanSlashes($this->storage->url($folderPath)),
+                'can' => true,
+                'loading' => false,
                 'last_modification' => false,
-                'date'              => false,
+                'date' => false,
             ];
         }
     }
@@ -489,7 +497,7 @@ trait GetFiles
      */
     public function recursivePaths($name, $pathCollection)
     {
-        return Str::before($pathCollection->implode('/'), $name).$name;
+        return Str::before($pathCollection->implode('/'), $name) . $name;
     }
 
     /**
