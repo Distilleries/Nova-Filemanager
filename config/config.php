@@ -115,5 +115,5 @@ return [
      */
     'jobs'      => [],
     
-    'sign_cloudfront_urls' => true,
+    'sign_cloudfront_urls' => env('FILEMANAGER_SIGN_CLOUDFRONT_URLS', false),
 ];
