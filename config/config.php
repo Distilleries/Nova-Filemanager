@@ -114,4 +114,6 @@ return [
     | use 'documents' as your default filter.
      */
     'jobs'      => [],
+    
+    'sign_cloudfront_urls' => true,
 ];
