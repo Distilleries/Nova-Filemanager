@@ -3,6 +3,7 @@
 namespace Infinety\Filemanager\Http\Services;
 
 use Carbon\Carbon;
+use Dreamonkey\CloudFrontUrlSigner\Facades\CloudFrontUrlSigner;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -40,6 +41,14 @@ class NormalizeFile
         $this->storagePath = $storagePath;
     }
 
+    public function getAssetUrl(string $basename)
+    {
+        if (config('filemanager.sign_cloudfront_urls')) {
+            return CloudFrontUrlSigner::sign($this->storage->url($basename));
+        }
+        return $this->storage->url($basename);
+    }
+
     /**
      * @return mixed
      */
@@ -50,7 +59,7 @@ class NormalizeFile
             'mime' => $this->getCorrectMimeFileType(),
             'path' => $this->storagePath,
             'size' => $this->getFileSize(),
-            'url'  => $this->cleanSlashes($this->storage->url($this->storagePath)),
+            'url'  => $this->cleanSlashes($this->getAssetUrl($this->storagePath)),
             'date' => $this->modificationDate(),
             'ext'  => $this->file->getExtension(),
         ]);
@@ -77,7 +86,7 @@ class NormalizeFile
         // Video
         if (Str::contains($mime, 'audio')) {
             $data->put('type', 'audio');
-            $src = str_replace(env('APP_URL'), '', $this->storage->url($this->storagePath));
+            $src = str_replace(env('APP_URL'), '', $this->getAssetUrl($this->storagePath));
             $data->put('src', $src);
         }
 
@@ -145,7 +154,7 @@ class NormalizeFile
     private function getImage($mime, $extension = false)
     {
         if (Str::contains($mime, 'image') || $extension == 'svg') {
-            return $this->storage->url($this->storagePath);
+            return $this->getAssetUrl($this->storagePath);
         }
 
         $fileType = new FileTypesImages();
