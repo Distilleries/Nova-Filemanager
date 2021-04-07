@@ -1,3 +1,5 @@
+window.axios.defaults.withCredentials = true;
+
 export default {
     getData(folder) {
         return window.axios
