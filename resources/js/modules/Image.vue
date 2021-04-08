@@ -113,6 +113,7 @@ export default {
             Minimum(
                 window.axios.get(this.file.image, {
                     responseType: 'blob',
+                    withCredentials: true,
                 })
             )
                 .then(({ headers, data }) => {

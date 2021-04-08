@@ -117,6 +117,7 @@ export default {
                         Math.round((progressEvent.loaded * 100) / progressEvent.total)
                     );
                 },
+                withCredentials: true,
             };
 
             let filePath;
