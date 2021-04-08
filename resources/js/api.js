@@ -1,5 +1,3 @@
-window.axios.defaults.withCredentials = true;
-
 export default {
     getData(folder) {
         return window.axios
@@ -7,6 +5,7 @@ export default {
                 params: {
                     folder,
                 },
+                withCredentials: true
             })
             .then(response => response.data);
     },
@@ -18,6 +17,7 @@ export default {
                     folder,
                     filter,
                 },
+                withCredentials: true
             })
             .then(response => response.data);
     },
@@ -56,7 +56,7 @@ export default {
 
     getInfo(file) {
         return window.axios
-            .post('/nova-vendor/infinety-es/nova-filemanager/actions/get-info', { file: file })
+            .post('/nova-vendor/infinety-es/nova-filemanager/actions/get-info', { file: file }, { withCredentials: true })
             .then(response => response.data);
     },
 
