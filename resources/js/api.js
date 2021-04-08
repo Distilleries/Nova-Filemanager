@@ -57,7 +57,10 @@ export default {
     getInfo(file) {
         return window.axios
             .post('/nova-vendor/infinety-es/nova-filemanager/actions/get-info', { file: file }, { withCredentials: true })
-            .then(response => response.data);
+            .then((response) => {
+                console.log(response);
+                return response.data;
+            });
     },
 
     removeFile(file) {
