@@ -289,9 +289,12 @@ class FileManagerService
                 $info = new NormalizeFile($this->storage, $fullPath, $path.$newName);
 
                 return response()->json(['success' => true, 'data' => $info->toArray()]);
+            } else {
+                $directories = $this->storage->directories($path);
+                if (in_array($file, $directories)) {
+                    return $this->renameDirectory($file, $newName);
+                }
             }
-
-            return response()->json(false);
         } catch (\Exception $e) {
             $directories = $this->storage->directories($path);
 
