@@ -22,11 +22,11 @@
     ],
     "require": {
         "php": ">=7.1.0",
-        "laravel/nova": "~2.0|~3.0"
+        "laravel/nova": "~2.0|~3.0|^4.0"
     },
     "require-dev": {
-        "orchestra/testbench": "^3.6",
-        "phpunit/phpunit": "7.1"
+        "orchestra/testbench": "^7",
+        "phpunit/phpunit": "^9"
     },
     "autoload": {
         "psr-4": {
