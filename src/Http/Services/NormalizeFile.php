@@ -208,7 +208,7 @@ class NormalizeFile
 
         //If no type
 
-        return $this->storage->getMimetype($this->storagePath);
+        return $this->storage->mimetype($this->storagePath);
     }
 
     private function availablesTextExtensions()
