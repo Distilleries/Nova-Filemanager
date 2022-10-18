@@ -75,12 +75,12 @@ class NormalizeFile
      */
     private function setExtras(Collection $data)
     {
-        $mime = $this->storage->getMimetype($this->storagePath);
+        $mime = $this->storage->mimetype($this->storagePath);
 
         // Image
         if (Str::contains($mime, 'image') || $data['ext'] == 'svg') {
             $data->put('type', 'image');
-            $data->put('dimensions', $this->getDimensions($this->storage->getMimetype($this->storagePath)));
+            $data->put('dimensions', $this->getDimensions($this->storage->mimetype($this->storagePath)));
         }
 
         // Video

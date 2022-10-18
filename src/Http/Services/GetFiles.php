@@ -240,7 +240,7 @@ trait GetFiles
             return 'dir';
         }
 
-        $mime = $this->storage->getMimetype($file['path']);
+        $mime = $this->storage->mimetype($file['path']);
         $extension = $file['extension'];
 
         if (Str::contains($mime, 'directory')) {
@@ -319,7 +319,7 @@ trait GetFiles
             return false;
         }
 
-        $mime = $this->storage->getMimetype($file['path']);
+        $mime = $this->storage->mimetype($file['path']);
         $extension = $file['extension'];
 
         if (Str::contains($mime, 'directory')) {
