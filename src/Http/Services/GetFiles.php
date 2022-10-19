@@ -6,6 +6,8 @@ use Carbon\Carbon;
 use Dreamonkey\CloudFrontUrlSigner\Facades\CloudFrontUrlSigner;
 use GuzzleHttp\Client;
 use Illuminate\Support\Str;
+use League\Flysystem\DirectoryListing;
+use League\Flysystem\FileAttributes;
 
 trait GetFiles
 {
@@ -28,6 +30,13 @@ trait GetFiles
     public function getFiles($folder, $order, $filter = false)
     {
         $filesData = $this->storage->listContents($folder);
+
+        if ($filesData instanceof DirectoryListing) {
+            $filesData = array_map(function (FileAttributes $attributes) {
+                return $attributes->jsonSerialize();
+            }, $filesData->toArray());
+        }
+
         $filesData = $this->normalizeFiles($filesData);
         $files = [];
 
@@ -204,7 +213,7 @@ trait GetFiles
      */
     public function setRelativePath($folder)
     {
-        $defaultPath = $this->storage->getDriver()->getAdapter()->getPathPrefix();
+        $defaultPath = $this->storage->path('/');
 
         $publicPath = str_replace($defaultPath, '', $folder);
 
@@ -402,6 +411,10 @@ trait GetFiles
                 // $size = $this->storage->getSize($file['path']);
                 $files[$key]['size'] = null;
             }
+
+            if (!isset($file['basename'])) {
+                $files[$key]['basename'] = basename($file['path']);
+            }
         }
 
         return $files;
@@ -472,7 +485,7 @@ trait GetFiles
      */
     public function getPaths($currentFolder)
     {
-        $defaultPath = $this->cleanSlashes($this->storage->getDriver()->getAdapter()->getPathPrefix());
+        $defaultPath = $this->cleanSlashes($this->storage->path('/'));
         $currentPath = $this->cleanSlashes($this->storage->path($currentFolder));
 
         $paths = $currentPath;
