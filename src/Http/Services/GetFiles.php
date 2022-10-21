@@ -7,7 +7,7 @@ use Dreamonkey\CloudFrontUrlSigner\Facades\CloudFrontUrlSigner;
 use GuzzleHttp\Client;
 use Illuminate\Support\Str;
 use League\Flysystem\DirectoryListing;
-use League\Flysystem\FileAttributes;
+use League\Flysystem\StorageAttributes;
 
 trait GetFiles
 {
@@ -32,7 +32,7 @@ trait GetFiles
         $filesData = $this->storage->listContents($folder);
 
         if ($filesData instanceof DirectoryListing) {
-            $filesData = array_map(function (FileAttributes $attributes) {
+            $filesData = array_map(function (StorageAttributes $attributes) {
                 return $attributes->jsonSerialize();
             }, $filesData->toArray());
         }
@@ -409,7 +409,7 @@ trait GetFiles
             }
             if (!isset($file['size'])) {
                 // $size = $this->storage->getSize($file['path']);
-                $files[$key]['size'] = null;
+                $files[$key]['size'] = $file['file_size'] ?? 0;
             }
 
             if (!isset($file['basename'])) {
@@ -532,6 +532,12 @@ trait GetFiles
     private function checkShouldHideFolder($path)
     {
         $filesData = $this->storage->listContents($path);
+
+        if ($filesData instanceof DirectoryListing) {
+            $filesData = array_map(function (StorageAttributes $attributes) {
+                return $attributes->jsonSerialize();
+            }, $filesData->toArray());
+        }
 
         $key = array_search('.hide', array_column($filesData, 'basename'));
 
