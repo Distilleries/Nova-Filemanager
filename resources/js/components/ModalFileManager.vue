@@ -177,7 +177,7 @@ export default {
         backupStatusses: [],
         showUpload: false,
         showCreateFolder: false,
-        currentPathFolder: this.currentPath,
+        currentPathFolder: '',
         files: [],
         parent: {},
         path: [],
@@ -335,6 +335,7 @@ export default {
     },
 
     created() {
+        this.currentPathFolder = this.currentPath
         if (localStorage.getItem('nova-filemanager-view')) {
             const view = localStorage.getItem('nova-filemanager-view');
 

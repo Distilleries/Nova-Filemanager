@@ -1,5 +1,5 @@
 <template>
-    <default-field :field="field">
+    <default-field :field="field" :errors="errors" :show-help-text="field.helpText !== null">
         <template slot="field">
 
             <template v-if="field.value && field.display == 'image'">
